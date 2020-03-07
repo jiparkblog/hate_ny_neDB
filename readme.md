@@ -6,6 +6,7 @@ Website whre people can submit their worst New York horror stories!
 View live working website here: https://jipark119-hate-ny-nedb.glitch.me/
 <!-- It is good practice to add an about or summary -->
 
+<img width="1377" alt="Screen Shot 2020-03-07 at 3 16 03 PM" src="https://user-images.githubusercontent.com/60330228/76151789-cb3edc00-6086-11ea-8bc7-c5ed5b23b19d.png">
 
 ## About
 You are invited to anonymously contribute your worst NYC stories to this website! 
