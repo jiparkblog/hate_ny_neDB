@@ -5,6 +5,8 @@ Website whre people can submit their worst New York horror stories!
 
 View live working website here: https://jipark119-hate-ny-nedb.glitch.me/
 <!-- It is good practice to add an about or summary -->
+
+
 ## About
 You are invited to anonymously contribute your worst NYC stories to this website! 
 Submit your stories and it will show up in story streams.You can edit and change it anytime. .
