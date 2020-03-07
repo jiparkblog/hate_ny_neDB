@@ -1,8 +1,30 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-
 const app = express();
+
+//import data library
+const Datastore = require("nedb");
+//automatically create file
+//timestampdata added for chronological order
+const db = new Datastore({filename:"data.db", timestampData: true,autoload:true})
+
+db.loadDatabase();
+
+//copy content from db.json to data.db
+// const content = fs.readFileSync('./data/db.json');
+// let listElement = JSON.parse(content);
+// let list = listElement.list;
+// list = list.map((list)=>{
+//     return{
+//        list: list
+//     };
+// });
+
+// db.insert(list,(err,docs)=>{
+//     return docs;
+// })
+
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -12,54 +34,56 @@ app.get("/",(req,res)=>{
     res.sendFile(path.join(__dirname,"views/index.html"))
 })
 
-//GET /lists
+
+//END POINTS
+
+//GET 
 app.get("/lists",(req,res)=>{
-    const list = getList();
-    res.json(list);
+    db.find({},(err,docs)=>{
+        res.json(docs);
+    })
 })
-
-//get lists from db.json
-function getList(){
-    const contents=fs.readFileSync(path.join(__dirname,"./data/db.json"));
-    const obj=JSON.parse(contents);
-    return obj;
-}
-
 
 
 //POST
 app.post("/lists",(req,res)=>{
     const addThis = req.body.list;
-    const list = addNew(addThis);
-    res.json(list);
-});
+    db.insert({list:addThis},(err,newDocs)=>{
+        res.json(newDocs)
+    // db.find({}, (findErr, entries) => {
+    //     return entries;
+    // });
+    })
 
-//add new list
-function addNew(addThis) {
-    const list= getList();
-    list.list.unshift(addThis);
-    fs.writeFileSync(path.join(__dirname,"./data/db.json"), JSON.stringify(list));
-    return list;
-}
+});
 
 
 //DELETE
 app.delete("/lists/:name",(req,res)=>{
     const listToDelete = req.params.name;
-    const list=deleteList(listToDelete);
-    res.json(list)
+    db.findOne({ list: listToDelete }, (err, entry) => {
+        db.remove(entry, (err) => {
+            db.find({}, (err, entries) => {
+                res.json(entries);
+            });
+        })
+    });
+
 });
 
+// UPDATE
+app.put("/lists/:name",(req,res)=>{
+    const listToUpdate = req.params.name;
+    const updatedData = req.body;
+    db.findOne({list:listToUpdate}, (err, entry) => {
+        db.update({_id: entry._id}, updatedData, () => {
+            db.find({}, (err, entries) => {
+                res.json(entries);
+            });
+        })
+    });
 
-//delte function
-function deleteList(listToDelete){
-    const list=getList();
-    //filter out that is NOT 'to be deleted item'
-    list.list= list.list.filter(list =>list !== listToDelete);
-    fs.writeFileSync(path.join(__dirname,"./data/db.json"),JSON.stringify(list))
-    return list;
-}
-
+});
 
 
 

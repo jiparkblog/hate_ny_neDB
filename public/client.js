@@ -1,13 +1,13 @@
 window.addEventListener("DOMContentLoaded",()=>{
 
-    const loveList=document.getElementById("list");
+    const entryList=document.getElementById("list");
 
-    //getting all data and putting it on html
+    //GET
     fetch("/lists").then(res=>res.json()).then((data)=>{
-        loveList.innerHTML=getList(data.list);
+       entryList.innerHTML=getList(data);
     });
 
-    //Adding to list from input form
+    //POST
     const inputForm = document.getElementById("add-form");
     inputForm.onsubmit = (event) =>{
         event.preventDefault();
@@ -24,31 +24,48 @@ window.addEventListener("DOMContentLoaded",()=>{
                 'Content-Type': 'application/json'
             },
         }).then(res => res.json()).then((data) =>{
-            loveList.innerHTML = getList(data.list);
+            addList(data);   
         });
-
+        
     }//on submit
 
 
 
 });//DOM LOADED
 
+//addList
+function addList(data){
+    const entryList=document.getElementById("list");
+    var add= document.createElement("div");
+    add.innerHTML = 
+        `<div data-list="${data.list}" class="lists">${data.list} 
+        <button onclick="removeList(event)">X</button>
+        <button onclick="editList(event)">Edit</button>
+        </div>
+        `  ;
+    entryList.prepend(add);
+
+ }
+
+ 
+
 //get list and display as lists
 function getList(data){
-    return data.map((data)=>{
-        return `<div data-list="${data}" class="lists">${data} 
+   return data.map((data)=>{
+        return `<div data-list="${data.list}" class="lists">${data.list} 
                 <button onclick="removeList(event)">X</button>
                 <button onclick="editList(event)">Edit</button>
                 </div>
                 `
-    }).join("");
+   }).join("");
 }
+
+
 
 //REMOVE
 function removeList(event){
-    const loveList=document.getElementById("list");
+    const entryList=document.getElementById("list");
     const list = event.target.parentElement.dataset.list;
-
     fetch(`/lists/${list}`,
     {
         method: "DELETE",
@@ -56,9 +73,46 @@ function removeList(event){
         'Content-Type': 'application/json'  
         }
     }).then(res=>res.json()).then((data)=>{
-        loveList.innerHTML=getList(data.list);
+      entryList.innerHTML=getList(data);
     })
 }
+
+// EDIT - UPDATE
+function editList(event){
+    const entryList=document.getElementById("list");
+    const list = event.target.parentElement.dataset.list;
+    let input  = document.createElement("input");
+    input.setAttribute("class", "editBox");
+    input.value= list;
+    event.target.parentElement.replaceWith(input);
+    let changedVal;
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+         event.preventDefault();
+         changedVal=this.value;
+
+         fetch(`/lists/${list}`,
+         {
+             method: "PUT",
+             headers:{
+             'Content-Type': 'application/json'  
+             },
+             body: JSON.stringify({
+                 "list":changedVal
+             })
+         }).then(res=>res.json()).then((data)=>{
+            entryList.innerHTML=getList(data);
+            })
+        }
+      });
+     
+   
+
+
+   
+}
+
+
 
 
 
